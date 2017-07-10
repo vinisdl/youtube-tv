@@ -3,9 +3,10 @@ const closeBtn = document.querySelector(".close")
 const menuBtn = document.querySelector(".menu")
 const panel = document.querySelector(".panel")
 const playBtn = document.querySelector(".play-btn")
+const nextBtn = document.querySelector(".next")
 const player = videojs('player')
 const errorMessage = ''
-const apikey = '' // your App key
+const apikey = 'AIzaSyDfuacUA9J0zbDhb_1UUCFG3gzNAPqMiAg' // your App key
 
 
 function play () {	
@@ -19,6 +20,11 @@ function play () {
 function togglePanel () {
   panel.classList.toggle('is-visible')
   menuBtn.classList.toggle("is-panel-visible")
+}
+
+function removeClass(){
+	panel.classList.remove('is-visible')
+  menuBtn.classList.remove("is-panel-visible")
 }
 
 function onInputKeyup (event) {
@@ -50,6 +56,7 @@ function shutdown () {
 	ipcRenderer.send('asynchronous-message', 'shutdown')
 }
 
+nextBtn.addEventListener("click", nextPlaylistVideo)
 menuBtn.addEventListener("click", togglePanel)
 playBtn.addEventListener("click", play)
 closeBtn.addEventListener("click", shutdown)
@@ -58,7 +65,11 @@ player.on('loadedmetadata', onLoadedMetadata, true)
 player.on('useractive', onUserActive, true)
 player.on('userinactive', onUserInactive, true)
 player.on('ended', function() {	
-	if(apikey){
+	nextPlaylistVideo();
+});
+
+function nextPlaylistVideo(){
+		if(apikey){
 		var url = document.getElementById("video-url").value
 		var path = url.split("v=")[1].replace("v=", "")	
 		var xhttp = new XMLHttpRequest();
@@ -67,7 +78,7 @@ player.on('ended', function() {
 				var object = JSON.parse(xhttp.responseText);						
 				document.getElementById("video-url").value = "https://www.youtube.com/watch?v=" + object.items[1].id.videoId			
 				play();
-				togglePanel()
+				removeClass();
 			}
 		};
 		xhttp.open("GET", "https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId="+ path
@@ -75,7 +86,7 @@ player.on('ended', function() {
 		, true);
 		xhttp.send();
 	}
-});
+}
 
 window.onresize = function (event) {
 	const win = remote.getCurrentWindow()
