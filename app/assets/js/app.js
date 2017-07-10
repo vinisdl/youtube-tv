@@ -1,13 +1,14 @@
 const { ipcRenderer, remote } = require('electron')
-
 const closeBtn = document.querySelector(".close")
 const menuBtn = document.querySelector(".menu")
 const panel = document.querySelector(".panel")
 const playBtn = document.querySelector(".play-btn")
 const player = videojs('player')
 const errorMessage = ''
+const apikey = 'your-api-key'
 
-function play () {
+
+function play () {	
 	const input = document.getElementById("video-url").value
 	if (!input) { return }
 
@@ -56,6 +57,23 @@ player.on('error', onError, true)
 player.on('loadedmetadata', onLoadedMetadata, true)
 player.on('useractive', onUserActive, true)
 player.on('userinactive', onUserInactive, true)
+player.on('ended', function() {	
+	var url = document.getElementById("video-url").value
+	var path = url.split("v=")[1].replace("v=", "")	
+document.getElementById("temp").value = "OK";
+	var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {		
+		togglePanel();
+    if (this.readyState == 4 && this.status == 200) {
+			var object = JSON.parse(xhttp.responseText);						
+			document.getElementById("video-url").value = "https://www.youtube.com/watch?v=" + object.items[1].id.videoId			
+			play();
+    }
+  };
+  xhttp.open("GET", "https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId="+ path +"&type=video&key=" + apikey
+  , true);
+  xhttp.send();
+});
 
 window.onresize = function (event) {
 	const win = remote.getCurrentWindow()

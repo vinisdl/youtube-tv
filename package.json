@@ -12,5 +12,8 @@
     "electron": "^1.6.8",
     "video.js": "^5.19.2",
     "videojs-youtube": "^2.4.0"
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^1.4.13"
   }
 }
