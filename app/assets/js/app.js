@@ -5,7 +5,7 @@ const panel = document.querySelector(".panel")
 const playBtn = document.querySelector(".play-btn")
 const nextBtn = document.querySelector(".next")
 const player = videojs('player')
-const iframe = document.getElementById('iframetwitchtv')
+const twitchIframe = document.getElementById('iframetwitchtv')
 const faceIframe = document.getElementById("facebookVideo")
 const errorMessage = ''
 const apikey = process.env.apikey
@@ -14,36 +14,43 @@ var lastv = [];
 function play () {	
 	const input = document.getElementById("video-url").value
 	if (!input) { return }
-
-
   if(input.indexOf("twitch") != -1){		
 		var splitedInput = input.split('/');
-		var path = 'https://player.twitch.tv/?channel=' + splitedInput[splitedInput.length -1];		
-		iframe.src = path;
-		iframe.style.display = 'flex';
-		togglePanel();
-		player.hide();
-		reseize();
-		nextBtn.style.display = 'none';
-	}	if(input.indexOf('facebook') != -1)
+		var path = 'https://player.twitch.tv/?channel=' + splitedInput[splitedInput.length -1];	
+			twitchIframe.src = path;		
+			showFrame(false, true,false);
+	}	else if(input.indexOf('facebook') != -1)
 	{
 		var path = 'https://www.facebook.com/plugins/video.php?show_text=0&href=' + input;
-		faceIframe.src = path;
-		faceIframe.style.display = 'flex';
-				iframe.style.display = 'none'
-
-		togglePanel();
-		player.hide();
-		reseize();
-		nextBtn.style.display = 'none';
+		faceIframe.src = path;	
+		showFrame(false, false, true);
 	}	
-	else{
-		iframe.style.display = 'none'
+	else{	
   	videojs('player').src({"src": input, "type": "video/youtube"})
-		togglePanel()
-		player.show()
-		nextBtn.style.display = '';
+		showFrame(true, false,false);
 	}
+}
+
+
+function showFrame(youtube,twitch, facebook){
+		if(twitch || facebook){	
+			player.hide();		
+			nextBtn.style.display = 'none';
+		} 
+		if(twitch){
+			faceIframe.style.display = 'none';
+			twitchIframe.style.display = 'flex'
+		} else if(facebook){
+			faceIframe.style.display = 'flex';
+			twitchIframe.style.display = 'none'
+		} else {
+			player.show()
+			twitchIframe.style.display = 'none'
+			faceIframe.style.display = 'none';
+			nextBtn.style.display = '';
+		}
+		togglePanel();
+	reseize();
 }
 
 function togglePanel () {
@@ -138,9 +145,9 @@ function reseize(){
 	const newX = bounds.x - (newWidth - bounds.width)
 	const newY = bounds.y - (newHeight - bounds.height)
 	faceIframe.height = newHeight;
-	iframe.height = newHeight;
+	twitchIframe.height = newHeight;
 	faceIframe.width = newWidth;
-	iframe.width = newWidth;
+	twitchIframe.width = newWidth;
   win.setBounds({
 		x: newX,
 		y: newY,
