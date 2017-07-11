@@ -5,7 +5,8 @@ const panel = document.querySelector(".panel")
 const playBtn = document.querySelector(".play-btn")
 const nextBtn = document.querySelector(".next")
 const player = videojs('player')
-const iframe = document.getElementById('iframetwitchtv');
+const iframe = document.getElementById('iframetwitchtv')
+const faceIframe = document.getElementById("facebookVideo")
 const errorMessage = ''
 const apikey = process.env.apikey
 var lastv = [];
@@ -24,7 +25,19 @@ function play () {
 		player.hide();
 		reseize();
 		nextBtn.style.display = 'none';
-	}else{
+	}	if(input.indexOf('facebook') != -1)
+	{
+		var path = 'https://www.facebook.com/plugins/video.php?show_text=0&href=' + input;
+		faceIframe.src = path;
+		faceIframe.style.display = 'flex';
+				iframe.style.display = 'none'
+
+		togglePanel();
+		player.hide();
+		reseize();
+		nextBtn.style.display = 'none';
+	}	
+	else{
 		iframe.style.display = 'none'
   	videojs('player').src({"src": input, "type": "video/youtube"})
 		togglePanel()
@@ -124,7 +137,9 @@ function reseize(){
 	const newHeight = window.innerHeight
 	const newX = bounds.x - (newWidth - bounds.width)
 	const newY = bounds.y - (newHeight - bounds.height)
+	faceIframe.height = newHeight;
 	iframe.height = newHeight;
+	faceIframe.width = newWidth;
 	iframe.width = newWidth;
   win.setBounds({
 		x: newX,
