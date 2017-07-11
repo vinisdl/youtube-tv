@@ -5,16 +5,32 @@ const panel = document.querySelector(".panel")
 const playBtn = document.querySelector(".play-btn")
 const nextBtn = document.querySelector(".next")
 const player = videojs('player')
+const iframe = document.getElementById('iframetwitchtv');
 const errorMessage = ''
-const apikey = 'AIzaSyDfuacUA9J0zbDhb_1UUCFG3gzNAPqMiAg' // your App key
-
+const apikey = process.env.apikey
+var lastv = [];
 
 function play () {	
 	const input = document.getElementById("video-url").value
 	if (!input) { return }
 
-  videojs('player').src({"src": input, "type": "video/youtube"})
-  togglePanel()
+
+  if(input.indexOf("twitch") != -1){		
+		var splitedInput = input.split('/');
+		var path = 'https://player.twitch.tv/?channel=' + splitedInput[splitedInput.length -1];		
+		iframe.src = path;
+		iframe.style.display = 'flex';
+		togglePanel();
+		player.hide();
+		reseize();
+		nextBtn.style.display = 'none';
+	}else{
+		iframe.style.display = 'none'
+  	videojs('player').src({"src": input, "type": "video/youtube"})
+		togglePanel()
+		player.show()
+		nextBtn.style.display = '';
+	}
 }
 
 function togglePanel () {
@@ -74,11 +90,21 @@ function nextPlaylistVideo(){
 		var path = url.split("v=")[1].replace("v=", "")	
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {		
-			if (this.readyState == 4 && this.status == 200) {					
+			if (this.readyState == 4 && this.status == 200) {									
 				var object = JSON.parse(xhttp.responseText);						
-				document.getElementById("video-url").value = "https://www.youtube.com/watch?v=" + object.items[1].id.videoId			
-				play();
-				removeClass();
+				var random = Math.floor((Math.random() * object.items.length));
+				var videoId = object.items[random].id.videoId;
+
+				if(lastv.indexOf(videoId) == -1)
+				{
+					document.getElementById("video-url").value = "https://www.youtube.com/watch?v=" + videoId
+					play();
+					removeClass();
+					lastv.push(videoId);
+				} else {
+					nextPlaylistVideo();
+				}
+				
 			}
 		};
 		xhttp.open("GET", "https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId="+ path
@@ -88,14 +114,18 @@ function nextPlaylistVideo(){
 	}
 }
 
-window.onresize = function (event) {
+window.onresize = reseize;
+
+
+function reseize(){
 	const win = remote.getCurrentWindow()
 	const bounds = win.getBounds()
 	const newWidth = window.innerWidth
 	const newHeight = window.innerHeight
 	const newX = bounds.x - (newWidth - bounds.width)
 	const newY = bounds.y - (newHeight - bounds.height)
-
+	iframe.height = newHeight;
+	iframe.width = newWidth;
   win.setBounds({
 		x: newX,
 		y: newY,
